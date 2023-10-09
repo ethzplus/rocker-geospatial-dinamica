@@ -24,13 +24,14 @@ RUN mkdir -p "$MODEL_DIR" "$APP_DIR"
 # Download and Unpack Dinamica EGO 7 AppImage
 # https://dinamicaego.com/nui_download/1792/
 WORKDIR $APP_DIR
-RUN apt-get update && apt-get install -y curl=7.88.1-8ubuntu2.2 bzip2=1.0.8-5build1 \
+RUN apt-get update && apt-get install -y wget=1.21.3-1ubuntu1 bzip2=1.0.8-5build1 \
     ca-certificates=20230311ubuntu0.23.04.1 \
     --no-install-recommends \
 # clean-up
  && rm -rf /var/lib/apt/lists/* \
 # download and unpack Dinamica EGO
- && curl -Ls https://dinamicaego.com/nui_download/1792/ -o DinamicaEGO-740-Ubuntu-LTS.AppImage \
+ && wget --progress=dot:giga https://dinamicaego.com/nui_download/1792/ -O \
+    DinamicaEGO-740-Ubuntu-LTS.AppImage \
 # make Dinamica EGO executable
  && chmod +x DinamicaEGO-740-Ubuntu-LTS.AppImage \
 # unpack Dinamica EGO
@@ -38,13 +39,13 @@ RUN apt-get update && apt-get install -y curl=7.88.1-8ubuntu2.2 bzip2=1.0.8-5bui
 
 # Install Micromamba - for R integration
 WORKDIR /
-RUN curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \
+RUN wget -qO- https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \
  && eval "$(/bin/micromamba shell hook -s posix)" \
  && micromamba shell init -s bash
 
 # Download Dinamica EGO R package
-RUN curl https://dinamicaego.com/dinamica/dokuwiki/lib/exe/fetch.php?media=dinamica_1.0.4.tar.gz \
-    -o "$APP_DIR/dinamica_1.0.4.tar.gz"
+RUN wget https://dinamicaego.com/dinamica/dokuwiki/lib/exe/fetch.php?media=dinamica_1.0.4.tar.gz \
+    -O "$APP_DIR/dinamica_1.0.4.tar.gz"
 
 # Create and activate conda environment for R
 COPY requirements.txt $APP_DIR/requirements.txt
@@ -52,7 +53,7 @@ COPY requirements.txt $APP_DIR/requirements.txt
 RUN micromamba env create --prefix "$APP_DIR/micromamba/envs/base" -c conda-forge \
     --file "$APP_DIR"/requirements.txt --yes \
 # activate base environment
- && eval "$(micromamba shell hook --shell bash)" \
+ && micromamba shell init -s bash \
  && micromamba activate base \
 # install R packages
  && R -e "install.packages('$APP_DIR/dinamica_1.0.4.tar.gz', repos = NULL, type = 'source')" \
