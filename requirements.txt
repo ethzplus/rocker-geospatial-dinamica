@@ -1,0 +1,11 @@
+r-base
+# Dinamica Integration
+r-rcppprogress
+r-filelock
+r-rcpp
+# Additional common R packages
+r-tidyverse
+r-stringr
+r-readr
+r-openxlsx
+r-callr

@@ -1,0 +1,104 @@
+name: Docker Build, Test, and Push to GitHub Container Registry
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/dinamica-ego
+
+jobs:
+
+  build:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Docker image layers
+        uses: actions/cache@v3
+        with:
+          path: /var/lib/docker
+          key: docker-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}
+          restore-keys: |
+            docker-${{ runner.os }}-
+
+      - name: Build Docker image
+        run: docker build -t $IMAGE_NAME:latest .
+
+  test:
+    name: Test Docker image
+    runs-on: ubuntu-latest
+
+    needs: build # Run this job after the build job
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore Docker image layers from cache
+        uses: actions/cache@v3
+        with:
+          path: /var/lib/docker
+          key: docker-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}
+          restore-keys: |
+            docker-${{ runner.os }}-
+
+      - name: Test DinamicaConsole Help
+        run: |
+            if docker run $IMAGE_NAME:latest -help | grep -q "Options:"; then
+                echo "Test passed: 'Options:' found in stdout."
+            else
+                echo "Test failed: 'Options:' not found in stdout."
+                exit 1
+            fi
+
+      - name: Test DinamicaConsole Version
+        run: |
+            if docker run $IMAGE_NAME:latest -version | grep -q "Dinamica EGO "; then
+                echo "Test passed: 'Dinamica EGO' found in stdout."
+            else
+                echo "Test failed: 'Dinamica EGO' not found in stdout."
+                exit 1
+            fi
+
+      - name: Test /bin/bash Entry Point
+        run: docker run --it --entrypoint /bin/bash $IMAGE_NAME:latest -c "exit 0"
+
+  push:
+    name: Push Docker image
+    runs-on: ubuntu-latest
+
+    needs: test # Run this job after the test job
+
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore Docker image layers from cache
+        uses: actions/cache@v3
+        with:
+            path: /var/lib/docker
+            key: docker-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}
+            restore-keys: |
+              docker-${{ runner.os }}-
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+            registry: ghcr.io
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker image
+        run: |
+          docker push $IMAGE_NAME:latest
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ github.ref }}
+          docker push $IMAGE_NAME:${{ github.ref }}
