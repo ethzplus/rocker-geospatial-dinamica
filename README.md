@@ -1,7 +1,7 @@
 [![Version](https://img.shields.io/badge/version-7.4-blue.svg)](https://dinamicaego.com/dinamica-7/)
 [![Build](https://github.com/cbueth/dinamica-ego-docker/actions/workflows/docker-build-test-push.yml/badge.svg)](https://github.com/cbueth/dinamica-ego-docker/actions/workflows/docker-build-test-push.yml)
 [![Lint](https://github.com/cbueth/dinamica-ego-docker/actions/workflows/lint.yml/badge.svg)](https://github.com/cbueth/dinamica-ego-docker/actions/workflows/lint.yml)
-[![Open Issue](https://img.shields.io/github/issues/cbueth/dinamica-ego-docker.svg)(https://github.com/cbueth/dinamica-ego-docker/issues)]
+[![Open Issue](https://img.shields.io/github/issues/cbueth/dinamica-ego-docker.svg)](https://github.com/cbueth/dinamica-ego-docker/issues)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 # Dinamica EGO Docker
