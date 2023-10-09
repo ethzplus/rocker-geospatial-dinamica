@@ -1,4 +1,5 @@
-name: Docker Build, Test, and Push to GitHub Container Registry
+# Docker Build, Test, and Push to GitHub Container Registry
+name: Docker Build
 
 on:
   push:
