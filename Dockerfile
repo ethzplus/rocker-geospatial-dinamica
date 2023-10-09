@@ -44,7 +44,7 @@ RUN wget -qO- https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj b
  && micromamba shell init -s bash
 
 # Download Dinamica EGO R package
-RUN wget https://dinamicaego.com/dinamica/dokuwiki/lib/exe/fetch.php?media=dinamica_1.0.4.tar.gz \
+RUN wget --progress=bar https://dinamicaego.com/dinamica/dokuwiki/lib/exe/fetch.php?media=dinamica_1.0.4.tar.gz \
     -O "$APP_DIR/dinamica_1.0.4.tar.gz"
 
 # Create and activate conda environment for R
