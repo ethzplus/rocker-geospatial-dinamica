@@ -58,7 +58,9 @@ jobs:
 
       - name: Test DinamicaConsole Help
         run: |
-            if docker run "${{ env.IMAGE_NAME }}":latest -help | grep -q "Options:"; then
+            output=$(docker run "${{ env.IMAGE_NAME }}":latest -help)
+            echo "$output"
+            if echo "$output" | grep -q "Options:"; then
                 echo "Test passed: 'Options:' found in stdout."
             else
                 echo "Test failed: 'Options:' not found in stdout."
@@ -67,7 +69,9 @@ jobs:
 
       - name: Test DinamicaConsole Version
         run: |
-            if docker run "${{ env.IMAGE_NAME }}":latest -version | grep -q "Dinamica EGO "; then
+            output=$(docker run "${{ env.IMAGE_NAME }}":latest -version)
+            echo "$output"
+            if echo "$output" | grep -q "Dinamica EGO"; then
                 echo "Test passed: 'Dinamica EGO' found in stdout."
             else
                 echo "Test failed: 'Dinamica EGO' not found in stdout."
@@ -75,7 +79,7 @@ jobs:
             fi
 
       - name: Test /bin/bash Entry Point
-        run: docker run --it --entrypoint /bin/bash "${{ env.IMAGE_NAME }}":latest -c "exit 0"
+        run: docker run --entrypoint /bin/bash "${{ env.IMAGE_NAME }}":latest -c "exit 0"
 
   push:
     name: Push Docker image
