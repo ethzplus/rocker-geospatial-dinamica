@@ -21,16 +21,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache Docker image layers
-        uses: actions/cache@v3
-        with:
-          path: /var/lib/docker
-          key: docker-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}
-          restore-keys: |
-            docker-${{ runner.os }}-
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        run: docker build -t $IMAGE_NAME:latest .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   test:
     name: Test Docker image
@@ -42,17 +43,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Restore Docker image layers from cache
-        uses: actions/cache@v3
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
         with:
-          path: /var/lib/docker
-          key: docker-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}
-          restore-keys: |
-            docker-${{ runner.os }}-
+          context: .
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Test DinamicaConsole Help
         run: |
-            if docker run $IMAGE_NAME:latest -help | grep -q "Options:"; then
+            if docker run "${{ env.IMAGE_NAME }}":latest -help | grep -q "Options:"; then
                 echo "Test passed: 'Options:' found in stdout."
             else
                 echo "Test failed: 'Options:' not found in stdout."
@@ -61,7 +66,7 @@ jobs:
 
       - name: Test DinamicaConsole Version
         run: |
-            if docker run $IMAGE_NAME:latest -version | grep -q "Dinamica EGO "; then
+            if docker run "${{ env.IMAGE_NAME }}":latest -version | grep -q "Dinamica EGO "; then
                 echo "Test passed: 'Dinamica EGO' found in stdout."
             else
                 echo "Test failed: 'Dinamica EGO' not found in stdout."
@@ -69,7 +74,7 @@ jobs:
             fi
 
       - name: Test /bin/bash Entry Point
-        run: docker run --it --entrypoint /bin/bash $IMAGE_NAME:latest -c "exit 0"
+        run: docker run --it --entrypoint /bin/bash "${{ env.IMAGE_NAME }}":latest -c "exit 0"
 
   push:
     name: Push Docker image
@@ -77,26 +82,30 @@ jobs:
 
     needs: test # Run this job after the test job
 
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/') # Only run this job on tags
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Restore Docker image layers from cache
-        uses: actions/cache@v3
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
         with:
-            path: /var/lib/docker
-            key: docker-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}
-            restore-keys: |
-              docker-${{ runner.os }}-
+          context: .
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-            registry: ghcr.io
-            username: ${{ github.actor }}
-            password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Docker image
         run: |
