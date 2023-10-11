@@ -46,6 +46,9 @@ To run a script `/my/folder/example.ego` from the mounted folder, run:
 docker run -v /my/folder/:/model dinamica-ego example.ego
 ```
 
+This image is based on the
+[`mambaorg/micromamba`](https://github.com/mamba-org/micromamba-docker) docker image.
+
 ### External Communication
 
 Dinamica EGO can communicate with external applications, like `R`, by exposing a 
@@ -63,7 +66,7 @@ As of now, the session is not exposed outside the container for further communic
 The second way to use the container is to start an interactive shell session:
 
 ```bash
-docker run -it --entrypoint /bin/bash -v /my/folder/:/model ghcr.io/cbueth/dinamica-ego-docker:latest
+docker run -it --entrypoint /bin/bash -v /my/folder/:/model dinamica-ego
 ```
 
 The environment variable `DINAMICA_EGO_CLI` points to the `DinamicaConsole` executable,
