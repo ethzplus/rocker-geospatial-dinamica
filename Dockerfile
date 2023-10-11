@@ -23,7 +23,7 @@ RUN mkdir -p "$MODEL_DIR" "$APP_DIR"
 # https://dinamicaego.com/nui_download/1792/
 WORKDIR $APP_DIR
 RUN apt-get update && apt-get install -y wget=1.21.3-1+b2 bzip2=1.0.8-5+b1 \
-    --no-install-recommends \
+     g++=4:12.2.0-3 --no-install-recommends \
 # clean-up
  && rm -rf /var/lib/apt/lists/* \
 # download and unpack Dinamica EGO
