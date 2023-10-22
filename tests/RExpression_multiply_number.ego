@@ -1,0 +1,14 @@
+@charset = UTF-8
+@date = 2023-Oct-13 15:04:52
+@version = 7.5.0.20231004
+Script {{
+    realValue1652 := RealValue 2;
+
+    @collapsed = no
+    calculateRexpression1653 := CalculateRExpression "b3V0cHV0IDwtIHYxKjIKb3V0cHV0RG91YmxlKCJvdXRwdXRfbnVtYmVyIiwgb3V0cHV0KQ==" .no {{
+        NumberValue realValue1652 1;
+    }};
+
+    @viewer.number = yes
+    _ := ExtractStructNumber calculateRexpression1653 $"(output_number)";
+}};

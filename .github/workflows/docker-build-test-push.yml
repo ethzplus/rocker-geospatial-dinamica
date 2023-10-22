@@ -81,6 +81,14 @@ jobs:
       - name: Test /bin/bash Entry Point
         run: docker run --entrypoint /bin/bash "${{ env.IMAGE_NAME }}":latest -c "exit 0"
 
+      - name: Test Dinamica EGO Models
+        # Run Dinamica EGO test models from the repository workspace/tests/* folder
+        # docker run -v tests:/model -it "${{ env.IMAGE_NAME }}":latest $model
+        run: |
+          for model in $(ls ${{ github.workspace }}/tests/*.ego); do
+              docker run -v ${{ github.workspace }}/tests:/model "${{ env.IMAGE_NAME }}":latest $(basename $model)
+          done
+
   push:
     name: Push Docker image
     runs-on: ubuntu-latest
