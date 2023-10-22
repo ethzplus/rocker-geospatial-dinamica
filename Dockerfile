@@ -29,15 +29,16 @@ RUN wget --progress=dot:giga https://dinamicaego.com/nui_download/1792/ -O \
 # remove AppImage
  && rm DinamicaEGO-xxx-Ubuntu-LTS.AppImage
 
-# Download Dinamica EGO R package
-RUN wget --progress=bar https://dinamicaego.com/dinamica/dokuwiki/lib/exe/fetch.php?media=dinamica_1.0.4.tar.gz \
-    -O "$APP_DIR/dinamica_1.0.4.tar.gz"
 
 # Install R packages - order matters
 RUN install2.r --error --skipinstalled \
     Rcpp RcppProgress rbenchmark inline filelock \
-    "$APP_DIR/dinamica_1.0.4.tar.gz" \
+# find filepath to $APP_DIR/squashfs-root/usr/bin/Data/R/Dinamica_[...].tar.gz
+    "$(find $APP_DIR/squashfs-root/usr/bin/Data/R/ -name 'Dinamica_*.tar.gz')" \
  && rm -rf /tmp/downloaded_packages
+
+# Check that R has package installed called Dinamica
+RUN R -e "library(Dinamica)"
 
 WORKDIR $MODEL_DIR
 COPY .dinamica_ego_7.conf $REGISTRY_FILE
