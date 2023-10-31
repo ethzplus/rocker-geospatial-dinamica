@@ -7,6 +7,7 @@ LABEL authors="Carlson Büth" \
 ENV MODEL_DIR="/model"
 # can be mounted when running the container
 ENV APP_DIR="/app"
+ENV DINAMICA_EGO_7_TEMP_DIR="/tmp/dinamica_ego_7_temp"
 # includes the Dinamica EGO application
 ENV DINAMICA_EGO_CLI="$APP_DIR/squashfs-root/usr/bin/DinamicaConsole"
 # Add shared libraries to the library path
@@ -15,7 +16,7 @@ ENV DINAMICA_EGO_7_INSTALLATION_DIRECTORY="$APP_DIR/squashfs-root/usr/bin"
 ENV REGISTRY_FILE="/root/.dinamica_ego_7.conf"
 
 # Create folders with
-RUN mkdir -p "$MODEL_DIR" "$APP_DIR"
+RUN mkdir -p "$MODEL_DIR" "$APP_DIR" "$DINAMICA_EGO_7_TEMP_DIR"
 
 WORKDIR $APP_DIR
 # Download and Unpack Dinamica EGO 7 AppImage

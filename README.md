@@ -60,6 +60,15 @@ By default, the packages from the [`requirements.txt`](requirements.txt) are ins
 To install more dependencies, add them to the base environment manually.
 As of now, the session is not exposed outside the container for further communication.
 
+### Temporary Directory
+
+Dinamica EGO uses a temporary directory to store intermediate files.
+These are stored inside the `DINAMICA_EGO_7_TEMP_DIR="/tmp/dinamica_ego_7_temp"`.
+If you prefer an external directory, you can mount it to the container:
+
+```bash
+docker run -v /my/temp/dir/:/tmp/dinamica_ego_7_temp dinamica-ego
+```
 
 ### Detailed Usage
 
