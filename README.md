@@ -82,6 +82,12 @@ The environment variable `DINAMICA_EGO_CLI` points to the `DinamicaConsole` exec
 and `APP_DIR` to the installation directory of Dinamica EGO.
 For further details, take a look at the [Dockerfile](Dockerfile).
 
+### Apptainer
+
+To use the image with [Apptainer](https://apptainer.org/docs/user/main/)
+you need to convert the image to a SIF image.
+To respect the various caveats migrating to Apptainer,
+there exists the example definition file [`dinamica_ego.def`](dinamica_ego.def).
    
 ## About Dinamica EGO
 
