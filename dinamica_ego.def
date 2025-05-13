@@ -11,8 +11,8 @@ From: {{ docker_image }}
 %post
     BUILD_TIME=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
     echo "export BUILD_TIME=\"${BUILD_TIME}\"" >> $APPTAINER_ENVIRONMENT
-    echo "AlternativePathForR = \"/usr/bin/Rscript\"" >> "$MODEL_DIR/.dinamica_ego_7.conf"
-    touch "$MODEL_DIR/.dinamica_ego_7_system.conf"
+    echo "AlternativePathForR = \"/usr/bin/Rscript\"" >> "$HOME/.dinamica_ego_8.conf"
+    touch "$MODEL_DIR/.dinamica_ego_8_system.conf"
 
 %startscript
     # cd "$MODEL_DIR"
@@ -23,24 +23,24 @@ From: {{ docker_image }}
     echo "Working directory: `pwd`"
     echo "Container was created at $BUILD_TIME"
     echo "Container was started at `date -u +"%Y-%m-%dT%H:%M:%SZ"`"
-    mkdir -p /tmp/dinamica_ego_7_temp
+    mkdir -p /tmp/dinamica
     echo "Running Dinamica EGO CLI"
     $DINAMICA_EGO_CLI "$@"
 
 %test
-    cd "$APP_DIR"
-    mkdir -p /tmp/dinamica_ego_7_temp
-    if [ -z "$APP_DIR" ]; then
-       echo "APP_DIR is not defined"
+    cd "$DINAMICA_EGO_8_HOME"
+    mkdir -p /tmp/dinamica
+    if [ -z "$DINAMICA_EGO_8_HOME" ]; then
+       echo "DINAMICA_EGO_8_HOME is not defined"
        exit 1
     else
-         echo "APP_DIR is $APP_DIR"
+         echo "DINAMICA_EGO_8_HOME is $DINAMICA_EGO_8_HOME"
     fi
-    if [ ! -d "$APP_DIR" ]; then
-        echo "APP_DIR is not a directory"
+    if [ ! -d "$DINAMICA_EGO_8_HOME" ]; then
+        echo "DINAMICA_EGO_8_HOME is not a directory"
         exit 1
     else
-        echo "APP_DIR is a directory"
+        echo "DINAMICA_EGO_8_HOME is a directory"
     fi
     # Try to call $DINAMICA_EGO_CLI -help/-version
     {
@@ -57,7 +57,7 @@ From: {{ docker_image }}
     }
 
 %labels
-    Author Carlson Büth
+    Author Carlson Büth, Jan Hartman
     Container {{ docker_image }}
 
 %help
@@ -68,9 +68,9 @@ From: {{ docker_image }}
     Run by mounting the LULCC directory to /model, no options need to be passed:
         apptainer run --bind /my/model/dir:/model built_image my_model.ego
 
-    If you want to use an external tmp directory, mount /tmp/dinamica_ego_7_temp
+    If you want to use an external tmp directory, mount /tmp/dinamica
     to the desired location.
-        apptainer run --bind /my/model/dir:/model,/my/tmp/dir:/tmp/dinamica_ego_7_temp
+        apptainer run --bind /my/model/dir:/model,/my/tmp/dir:/tmp/dinamica
         built_image my_model.ego
 
     For further details about how to modify this definition file, see the Apptainer

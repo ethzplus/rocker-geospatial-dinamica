@@ -1,49 +1,66 @@
-FROM r-base:4.3.1
-LABEL authors="Carlson Büth" \
-      version="7.5" \
-      description="Docker image for Dinamica EGO."
+ARG DINAMICA_TARGET_DIR="/opt/dinamica"
+# Download AppImage and extract it; by doing a multi-stage build, we can discard the
+# image cleanly but keep the download layer cached on the build system.
+# Pin to amd64 because Dinamica only gets distributed for that platform
+FROM --platform=amd64 ubuntu:noble AS extractor
 
-# Environment variables
+ARG DINAMICA_EGO_DOWNLOAD_URL="https://dinamicaego.com/nui_download/1960/"
+ARG DINAMICA_EGO_DOWNLOAD_CHECKSUM="sha256:22c760ff09dbfbd869834d8190491b6bee8dff5e76eeb33ad9d4051f440361a3"
+ARG DINAMICA_TARGET_DIR
+
+ADD --checksum=$DINAMICA_EGO_DOWNLOAD_CHECKSUM \
+    --chmod=0755 \
+    $DINAMICA_EGO_DOWNLOAD_URL \
+    $DINAMICA_TARGET_DIR/DinamicaEGO.AppImage
+
+WORKDIR ${DINAMICA_TARGET_DIR}
+RUN "./DinamicaEGO.AppImage" --appimage-extract
+
+# Build the final image
+# We only install the R package and set up environment variables
+FROM --platform=amd64 rocker/geospatial:4.5.0 AS final
+ARG DINAMICA_TARGET_DIR
+LABEL authors="Carlson Büth, Jan Hartman" \
+    description="rocker/geospatial image bundling Dinamica EGO."
+
+# Only copy over everything inside the squashfs-root dir
+# TODO avoid copying the bundled duplicate system dependencies to reduce image size
+COPY --from=extractor ${DINAMICA_TARGET_DIR}/squashfs-root/ $DINAMICA_TARGET_DIR
+
+# Install bundled R package to system library; needs remotes because base
+# install.packages does not install additional dependencies when using tarballs
+RUN Rscript - <<EOF
+remotes::install_local(list.files(
+  "$DINAMICA_TARGET_DIR/usr/bin/Data/R", 
+  pattern = 'Dinamica_.*.tar.gz', 
+  recursive = TRUE, 
+  full.names = TRUE
+))
+EOF
+
+# Dynamically generate dinamica_ego_X.conf with X being the major version
+RUN cat <<EOF > ${HOME}/.dinamica_ego_8.conf
+AlternativePathForR = "/usr/local/bin/Rscript"
+ClConfig = "0"
+MemoryAllocationPolicy = "1"
+RCranMirror = "${CRAN:-https://cloud.r-project.org/}"
+EOF
+
+# AppImages deliver their own .so files, they need to be attached on path
+ENV LD_LIBRARY_PATH=$DINAMICA_TARGET_DIR/usr/lib/:$LD_LIBRARY_PATH
+ENV PATH=$PATH:$DINAMICA_TARGET_DIR/usr/bin
+# Rocker images override system PATH; override it back
+RUN echo "PATH=${PATH}" >> ${R_HOME}/etc/Renviron.site
+
 ENV MODEL_DIR="/model"
-# can be mounted when running the container
-ENV APP_DIR="/app"
-ENV DINAMICA_EGO_7_TEMP_DIR="/tmp/dinamica_ego_7_temp"
-# includes the Dinamica EGO application
-ENV DINAMICA_EGO_CLI="$APP_DIR/squashfs-root/usr/bin/DinamicaConsole"
-# Add shared libraries to the library path
-ENV LD_LIBRARY_PATH="$APP_DIR/squashfs-root/usr/lib/:$LD_LIBRARY_PATH"
-ENV DINAMICA_EGO_7_INSTALLATION_DIRECTORY="$APP_DIR/squashfs-root/usr/bin"
-ENV REGISTRY_FILE="/root/.dinamica_ego_7.conf"
+ENV DINAMICA_EGO_8_INSTALLATION_DIRECTORY=$DINAMICA_TARGET_DIR/usr/bin
+ENV DINAMICA_EGO_CLI=$DINAMICA_TARGET_DIR/usr/bin/DinamicaConsole
+ENV DINAMICA_EGO_8_TEMP_DIR="/tmp/dinamica"
+ENV DINAMICA_EGO_8_HOME=${DINAMICA_TARGET_DIR}
 
-# Create folders with
-RUN mkdir -p "$MODEL_DIR" "$APP_DIR" "$DINAMICA_EGO_7_TEMP_DIR"
+RUN mkdir -p ${DINAMICA_EGO_8_TEMP_DIR} ${DINAMICA_EGO_8_HOME}
 
-WORKDIR $APP_DIR
-# Download and Unpack Dinamica EGO 7 AppImage
-# https://dinamicaego.com/nui_download/1792/
-RUN wget --progress=dot:giga https://dinamicaego.com/nui_download/1792/ -O \
-    DinamicaEGO-xxx-Ubuntu-LTS.AppImage \
-# make Dinamica EGO executable
- && chmod +x DinamicaEGO-xxx-Ubuntu-LTS.AppImage \
-# unpack Dinamica EGO
- && ./DinamicaEGO-xxx-Ubuntu-LTS.AppImage --appimage-extract \
-# remove AppImage
- && rm DinamicaEGO-xxx-Ubuntu-LTS.AppImage
+WORKDIR ${MODEL_DIR}
 
-
-# Install R packages - order matters
-RUN install2.r --error --skipinstalled \
-    Rcpp RcppProgress rbenchmark inline filelock \
-# find filepath to $APP_DIR/squashfs-root/usr/bin/Data/R/Dinamica_[...].tar.gz
-    "$(find $APP_DIR/squashfs-root/usr/bin/Data/R/ -name 'Dinamica_*.tar.gz')" \
- && rm -rf /tmp/downloaded_packages
-
-# Check that R has package installed called Dinamica
-RUN R -e "library(Dinamica)"
-
-WORKDIR $MODEL_DIR
-COPY .dinamica_ego_7.conf $REGISTRY_FILE
-
-# Define entrypoint for the DinamicaConsole in the AppImage
-# passes all arguments to the entrypoint
-ENTRYPOINT ["/bin/bash", "-c", "$DINAMICA_EGO_CLI \"$@\"", "--"]
+# Define CMD for the DinamicaConsole; passes all arguments given to container
+ENTRYPOINT ["/bin/bash", "-c", "DinamicaConsole \"$@\"", "--"]
