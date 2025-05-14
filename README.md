@@ -1,5 +1,5 @@
 [![Dinamica Version](https://img.shields.io/badge/Dinamica-v8.3-blue.svg)](https://dinamicaego.com/dinamica-8/)
-[![Rocker Geospatial Version](https://img.shields.io/badge/rocker/geospatial-v4.5-blue.svg)](https://hub.docker.com/r/rocker/geospatial/tags?name=4.5)
+[![Rocker Version](https://img.shields.io/badge/rocker/geospatial-v4.5-blue.svg)](https://hub.docker.com/r/rocker/r-ver/tags?name=4.5)
 
 # Dinamica EGO Docker
 
@@ -9,7 +9,7 @@ geospatial R tooling in a Docker container for simplified deployment and develop
 ## Introduction
 
 This repository provides the tooling for containerizing a
-[rocker/geospatial](https://rocker-project.org/images/versioned/rstudio.html) and
+[rocker/r-ver](https://rocker-project.org/images/versioned/rstudio.html) and
 [Dinamica EGO](https://www.dinamicaego.com/) environment. Dinamica EGO is a
 sophisticated platform for environmental modeling, offering a wide range of modeling and
 analysis capabilities.

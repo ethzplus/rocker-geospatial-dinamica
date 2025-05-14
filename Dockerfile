@@ -2,6 +2,7 @@ ARG DINAMICA_TARGET_DIR="/opt/dinamica"
 # Download AppImage and extract it; by doing a multi-stage build, we can discard the
 # image cleanly but keep the download layer cached on the build system.
 # Pin to amd64 because Dinamica only gets distributed for that platform
+# Use ubuntu:noble because it is also the base image for rocker/r-ver:4.5.0
 FROM --platform=amd64 ubuntu:noble AS extractor
 
 ARG DINAMICA_EGO_DOWNLOAD_URL="https://dinamicaego.com/nui_download/1960/"
@@ -18,7 +19,15 @@ RUN "./DinamicaEGO.AppImage" --appimage-extract
 
 # Build the final image
 # We only install the R package and set up environment variables
-FROM --platform=amd64 rocker/geospatial:4.5.0 AS final
+FROM --platform=amd64 rocker/r-ver:4.5.0 AS final
+
+RUN /rocker_scripts/install_pandoc.sh
+ENV CTAN_REPO="https://mirror.ctan.org/systems/texlive/tlnet"
+ENV PATH="$PATH:/usr/local/texlive/bin/linux"
+RUN /rocker_scripts/install_verse.sh
+# TODO reduce install_geospatial.sh; it is way overblown for what we need
+RUN /rocker_scripts/install_geospatial.sh
+
 ARG DINAMICA_TARGET_DIR
 LABEL authors="Carlson Büth, Jan Hartman" \
     description="rocker/geospatial image bundling Dinamica EGO."
