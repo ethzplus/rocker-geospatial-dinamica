@@ -19,13 +19,16 @@ RUN "./DinamicaEGO.AppImage" --appimage-extract
 
 # Build the final image
 # We only install the R package and set up environment variables
-FROM --platform=amd64 rocker/r-ver:4.5.0 AS final
+FROM rocker/r-ver:4.5.0 AS final
 
-RUN /rocker_scripts/install_pandoc.sh
-ENV CTAN_REPO="https://mirror.ctan.org/systems/texlive/tlnet"
+# ensure multiarch support - adds amd64 to apt sources and installs C/C++ libs
+COPY /scripts/install_amd64_libs.sh /rocker_scripts/
+RUN /rocker_scripts/install_amd64_libs.sh
+
+ENV CRAN="https://cloud.r-project.org/"
 ENV PATH="$PATH:/usr/local/texlive/bin/linux"
-RUN /rocker_scripts/install_verse.sh
 # TODO reduce install_geospatial.sh; it is way overblown for what we need
+COPY /scripts/install_geospatial.sh /rocker_scripts/install_geospatial.sh
 RUN /rocker_scripts/install_geospatial.sh
 
 ARG DINAMICA_TARGET_DIR
@@ -38,14 +41,8 @@ COPY --from=extractor ${DINAMICA_TARGET_DIR}/squashfs-root/ $DINAMICA_TARGET_DIR
 
 # Install bundled R package to system library; needs remotes because base
 # install.packages does not install additional dependencies when using tarballs
-RUN Rscript - <<EOF
-remotes::install_local(list.files(
-  "$DINAMICA_TARGET_DIR/usr/bin/Data/R", 
-  pattern = 'Dinamica_.*.tar.gz', 
-  recursive = TRUE, 
-  full.names = TRUE
-))
-EOF
+COPY /scripts/install_dinamica_pkg.r /rocker_scripts/install_dinamica_pkg.r
+RUN /rocker_scripts/install_dinamica_pkg.r
 
 # Dynamically generate dinamica_ego_X.conf with X being the major version
 RUN cat <<EOF > ${HOME}/.dinamica_ego_8.conf

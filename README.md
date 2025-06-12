@@ -10,14 +10,13 @@ geospatial R tooling in a Docker container for simplified deployment and develop
 
 This repository provides the tooling for containerizing a
 [rocker/r-ver](https://rocker-project.org/images/versioned/rstudio.html) and
-[Dinamica EGO](https://www.dinamicaego.com/) environment. Dinamica EGO is a
-sophisticated platform for environmental modeling, offering a wide range of modeling and
-analysis capabilities.
+[Dinamica EGO](https://www.dinamicaego.com/) environment. Dinamica EGO is a platform for
+environmental modeling, offering a wide range of modeling and analysis capabilities.
 
 **Please note:**
-Dinamica EGO is copyrighted software, and its use is subject to the terms and 
+Dinamica EGO is copyrighted software, and its use is subject to the terms and
 conditions of the [Dinamica EGO License Agreement](https://dinamicaego.com/license/).
-Ensure that you have the necessary permissions to use and distribute this software 
+Ensure that you have the necessary permissions to use and distribute this software
 in accordance with the license.
 
 ## Getting Started
@@ -33,11 +32,13 @@ To build the image yourself, you only need to clone this repository and run:
 docker build -t dinamica-ego:latest .
 ```
 
-To run a script `/my/folder/example.ego` from the mounted folder, run:
+To run a script, specifically the test included in this repo at `tests/RExpression_multiply_number.ego`, run:
 
 ```bash
-docker run -v /my/folder/:/model dinamica-ego example.ego
+docker run -v $PWD/tests/:/model dinamica-ego RExpression_multiply_number.ego
 ```
+
+The `-v` bind mounts a folder into the container. The first argument must be an absolute path on the host, hence the `$PWD` prefix.
 
 ### External Communication
 
@@ -86,9 +87,9 @@ Please be aware that the use of Dinamica EGO is subject to the terms and conditi
 ## Copyright
 
 - [**Dinamica EGO**](https://dinamicaego.com/license/)
-  - Copyright 1998-2024 Centro de Sensoriamento Remoto / Universidade Federal de Minas Gerais - Brazil.
-  - All Rights Reserved.
-  - No warranty whatsoever is provided.
+    - Copyright 1998-2024 Centro de Sensoriamento Remoto / Universidade Federal de Minas Gerais - Brazil.
+    - All Rights Reserved.
+    - No warranty whatsoever is provided.
 - This repo is licensed under the [MIT License](LICENSE)
 
 ## Support and Contact
