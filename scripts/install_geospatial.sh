@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# TODO reduce the dependencies here, they're overblown for what we need
+
 set -e
 
 # always set this for scripts but don't declare as ENV..
