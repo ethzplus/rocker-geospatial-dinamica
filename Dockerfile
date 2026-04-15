@@ -24,7 +24,7 @@ RUN "./DinamicaEGO.AppImage" --appimage-extract
 
 # Stage 2: Build the actual image; add geospatial libs, copy Dinamica files, install
 # Dinamica package, set up default Dinamica config
-FROM --platform=linux/amd64 rocker/r-ver:4.5.1 AS final
+FROM --platform=linux/amd64 rocker/r-ver:4.5.3 AS final
 ARG DINAMICA_TARGET_DIR
 LABEL authors="Carlson Büth, Jan Hartman" \
     description="rocker/geospatial image bundling Dinamica EGO."
