@@ -1,4 +1,4 @@
-[![Dinamica Version](https://img.shields.io/badge/Dinamica-v8.3-blue.svg)](https://dinamicaego.com/dinamica-8/)
+[![Dinamica Version](https://img.shields.io/badge/Dinamica-v8-blue.svg)](https://dinamicaego.com/dinamica-8/)
 [![Rocker Version](https://img.shields.io/badge/rocker/geospatial-v4.5-blue.svg)](https://hub.docker.com/r/rocker/r-ver/tags?name=4.5)
 
 # Dinamica EGO Docker
