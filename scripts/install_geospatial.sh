@@ -43,10 +43,7 @@ apt_install \
     sqlite3
 
 install2.r --error --skipmissing --skipinstalled -n "$NCPUS" \
-    RNetCDF \
-    raster \
     sf \
-    sp \
     stars \
     terra
 
